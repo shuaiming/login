@@ -13,9 +13,9 @@ import (
 const (
 	urlKeyRedirect string = "redirect"
 	// sesKeyOpenID Session key of OpenID
-	sesKeyOpenID string = "github.com/shuaiming/openid/login.User"
+	sesKeyOpenID string = "github.com/shuaiming/login.User"
 	// SesKeyRedirect URL variable key for redirection after verified
-	sesKeyRedirect string = "github.com/shuaiming/openid/login.Redirect"
+	sesKeyRedirect string = "github.com/shuaiming/login.Redirect"
 )
 
 // OpenID pod.handler
