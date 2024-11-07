@@ -5,7 +5,6 @@ import (
 	"crypto/md5"
 	"encoding/gob"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -79,7 +78,7 @@ func (ms *FilesystemStore) LoadOrCreate(
 	r *http.Request, sid string) (s Session, created bool) {
 	path := ms.sid2path(sid)
 
-	file, err := ioutil.ReadFile(path)
+	file, err := os.ReadFile(path)
 
 	if err == nil {
 		var j FileSession
@@ -119,7 +118,7 @@ func (ms *FilesystemStore) Store(
 		return
 	}
 
-	if err := ioutil.WriteFile(path, b.Bytes(), 0640); err != nil {
+	if err := os.WriteFile(path, b.Bytes(), 0640); err != nil {
 		log.Println(err)
 	}
 }
@@ -140,7 +139,7 @@ func (ms *FilesystemStore) GC() (int, int) {
 
 		from++
 
-		file, err := ioutil.ReadFile(path)
+		file, err := os.ReadFile(path)
 		if err != nil {
 			log.Println(err)
 			return err

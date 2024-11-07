@@ -1,11 +1,13 @@
 /*
 Package openid usage example:
+
 	realm := "https://localhost"
 	opEndpoint := "https://openidprovider.com/openid"
 	callbackPrefix = "/openid/verify"
 	o = openid.New(realm)
 
 redirect to OpenID Server login url:
+
 	func loginHandler(w http.ResponseWriter, r *http.Request){
 		url, err := o.CheckIDSetup(opEndpoint, callbackPrefix)
 		...
@@ -14,6 +16,7 @@ redirect to OpenID Server login url:
 	}
 
 verify OpenID Server redirect back:
+
 	func verifyHander(w http.ResponseWriter, r *http.Request){
 		...
 		user, err := o.IDRes(r)
@@ -25,7 +28,7 @@ package openid
 import (
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -140,7 +143,7 @@ func (o *OpenID) associate(endpoint string) *Association {
 		return nil
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil
 	}
