@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/shuaiming/openid"
@@ -27,7 +28,7 @@ type OpenID struct {
 	redirect string
 }
 
-//  New OpenID
+// New OpenID
 func New(prefix, realm, endpoint, keyRedir string) *OpenID {
 
 	if keyRedir == "" {
@@ -65,7 +66,7 @@ func (o *OpenID) ServeHTTP(
 	}
 
 	// redirectURL url return back after login/logout
-	redirectURL := r.URL.Query().Get(urlKeyRedirect)
+	redirectURL := validateRedirectURL(r.URL.Query().Get(urlKeyRedirect))
 
 	loginURL := fmt.Sprintf("%s/login", o.prefix)
 	logoutURL := fmt.Sprintf("%s/logout", o.prefix)
@@ -126,4 +127,32 @@ func GetUser(s sessions.Session) map[string]string {
 	}
 
 	return nil
+}
+
+// validateRedirectURL checks that redirectURL is a safe relative path.
+// Returns empty string if input is empty, "/" if input is unsafe.
+func validateRedirectURL(redirectURL string) string {
+	if redirectURL == "" {
+		return ""
+	}
+
+	// Replace backslashes — browsers treat \ as / in URLs
+	redirectURL = strings.ReplaceAll(redirectURL, "\\", "/")
+
+	u, err := url.Parse(redirectURL)
+	if err != nil {
+		return "/"
+	}
+
+	// Reject absolute URLs (has scheme or host)
+	if u.Scheme != "" || u.Host != "" {
+		return "/"
+	}
+
+	// Reject protocol-relative URLs (//evil.com) and backslash bypass (/\\evil.com)
+	if strings.HasPrefix(u.Path, "//") || strings.HasPrefix(u.Path, "/\\") {
+		return "/"
+	}
+
+	return u.String()
 }
