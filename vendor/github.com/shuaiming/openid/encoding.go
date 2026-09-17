@@ -30,6 +30,8 @@ func encodeHTTP(v url.Values, p map[string]string) {
 func parseKeyValue(body []byte) (map[string]string, error) {
 	p := make(map[string]string)
 	for _, b := range bytes.Split(body, []byte("\n")) {
+		// 有的实现用 CRLF 分行，留下 \r 会让最后一个字段的值多一个字符
+		b = bytes.TrimRight(b, "\r")
 		if len(b) == 0 {
 			continue
 		}

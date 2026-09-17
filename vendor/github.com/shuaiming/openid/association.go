@@ -33,6 +33,9 @@ type Association struct {
 	Expires time.Time
 }
 
+// sign 按 openid.signed 列出的字段和顺序算 HMAC
+// 缺的字段按空串参与（规范如此）：攻击者往 signed 里塞字段只会让消息
+// 变化、签名对不上。
 func (a *Association) sign(
 	params map[string]string, signed []string) (string, error) {
 
@@ -52,6 +55,20 @@ func (a *Association) sign(
 	}
 
 	return base64.StdEncoding.EncodeToString(h.Sum(nil)), nil
+}
+
+// verify 校验回执签名
+// 用 hmac.Equal 做常量时间比较，不用 ==：字符串比较会在第一个不同的
+// 字节就返回，理论上能被计时探测。
+func (a *Association) verify(
+	params map[string]string, signed []string, sig string) bool {
+
+	want, err := a.sign(params, signed)
+	if err != nil {
+		return false
+	}
+
+	return hmac.Equal([]byte(want), []byte(sig))
 }
 
 // associations store association with key of OpenID endpoint

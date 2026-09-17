@@ -21,6 +21,20 @@ func (m *MemorySession) expired() bool {
 	return time.Now().After(m.expires)
 }
 
+// Empty 会话里没有任何数据
+// sync.Map 没有 Len，只能 Range 到第一个元素就停。
+func (m *MemorySession) Empty() bool {
+	empty := true
+
+	m.Range(func(_, _ interface{}) bool {
+		empty = false
+
+		return false
+	})
+
+	return empty
+}
+
 // Load value with key
 func (m *MemorySession) Load(key string) (value interface{}, ok bool) {
 	m.updateExpires()
